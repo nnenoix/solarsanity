@@ -1,0 +1,14 @@
+{
+  "name": "SolarSanity — Solar Quote Auditor",
+  "short_name": "SolarSanity",
+  "description": "Audit your solar quote in 30 seconds: fair-price check, hidden loan dealer fees, the expired 30% tax-credit trap, and a ready negotiation email. Runs in your browser, nothing uploaded.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16140f",
+  "theme_color": "#16140f",
+  "lang": "en",
+  "categories": ["finance", "utilities", "shopping"],
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

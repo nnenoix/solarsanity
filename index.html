@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SolarSanity — is your solar quote a rip-off?</title>
+  <meta name="description" content="Paste your solar quote and get a brutal, itemized audit in 30 seconds: fair price check, hidden loan dealer fees, the expired 30% tax-credit trap, and a negotiation script. Runs in your browser — nothing is uploaded." />
+  <meta name="theme-color" content="#16140f" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./"><img src="./icon.svg" alt="" /> SolarSanity</a>
+    <span class="badge" title="Everything is computed in your browser. Nothing is uploaded, no lead sold.">
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 1 3 5v6c0 5 3.8 9.7 9 11 5.2-1.3 9-6 9-11V5l-9-4Zm0 10.9h7c-.5 3.9-3.1 7.4-7 8.5V12H5V6.3l7-3.1v8.7Z"/></svg>
+      No upload · no lead sold
+    </span>
+  </header>
+
+  <main class="app">
+    <section id="form-stage" class="stage">
+      <div class="hero">
+        <h1>Is your solar quote a <span>rip-off?</span></h1>
+        <p>Drop in a few numbers from your proposal. SolarSanity checks it against fair local pricing, exposes hidden loan "dealer fees," and flags the expired 30% tax-credit trap — then writes your negotiation email. Nothing leaves your browser.</p>
+      </div>
+
+      <form id="quoteForm" class="card">
+        <div class="grid">
+          <div class="field">
+            <label for="state">State</label>
+            <select id="state"></select>
+          </div>
+          <div class="field">
+            <label for="sizeKw">System size <span class="hint">(kW)</span></label>
+            <input id="sizeKw" type="number" inputmode="decimal" step="0.1" min="0" placeholder="10" />
+          </div>
+          <div class="field">
+            <label for="cashPrice">Total price <span class="hint">(cash / system price, $)</span></label>
+            <input id="cashPrice" type="number" inputmode="numeric" min="0" placeholder="35000" />
+          </div>
+          <div class="field">
+            <label for="financingType">How are you paying?</label>
+            <select id="financingType">
+              <option value="cash">Cash</option>
+              <option value="loan">Loan / financed</option>
+              <option value="lease">Lease</option>
+              <option value="ppa">PPA</option>
+            </select>
+          </div>
+
+          <div class="field" id="f-financed">
+            <label for="financedAmount">Amount financed <span class="hint">(total $, optional)</span></label>
+            <input id="financedAmount" type="number" inputmode="numeric" min="0" placeholder="45000" />
+          </div>
+          <div class="field" id="f-apr">
+            <label for="apr">Loan APR <span class="hint">(%)</span></label>
+            <input id="apr" type="number" inputmode="decimal" step="0.01" min="0" placeholder="1.99" />
+          </div>
+
+          <div class="field hidden" id="f-escalator">
+            <label for="escalatorPct">Annual escalator <span class="hint">(%/yr)</span></label>
+            <input id="escalatorPct" type="number" inputmode="decimal" step="0.1" min="0" placeholder="2.9" />
+          </div>
+
+          <div class="field">
+            <label for="promisedKwh">Promised production <span class="hint">(kWh/yr, optional)</span></label>
+            <input id="promisedKwh" type="number" inputmode="numeric" min="0" placeholder="16000" />
+          </div>
+          <div class="field">
+            <label for="batteryKwh">Battery size <span class="hint">(kWh, 0 if none)</span></label>
+            <input id="batteryKwh" type="number" inputmode="decimal" step="0.1" min="0" placeholder="0" />
+          </div>
+
+          <div class="field full checkline">
+            <input id="assumes30Credit" type="checkbox" checked />
+            <label for="assumes30Credit" style="font-weight:600;color:var(--ink)">Their savings math assumes the 30% federal tax credit</label>
+          </div>
+        </div>
+        <button class="btn btn--primary btn--wide" id="auditBtn" type="submit">Audit my quote</button>
+      </form>
+      <p class="disclaimer">Estimates for negotiation, not financial, tax, or legal advice. Benchmarks are 2026 market approximations — verify current state/utility incentives yourself.</p>
+    </section>
+
+    <section id="result-stage" class="stage hidden">
+      <div id="verdict"></div>
+      <div id="flags"></div>
+
+      <div class="section-title">Your negotiation email</div>
+      <div id="scriptBox" class="card"></div>
+
+      <div class="row">
+        <button class="btn btn--soft" id="editBtn">Edit numbers</button>
+        <button class="btn btn--primary" id="againBtn">New quote</button>
+      </div>
+      <p class="disclaimer">SolarSanity is independent — we don't sell your info or take installer referral fees.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Runs entirely in your browser. No account, no upload, no lead-selling.</p>
+    <p>Pro (PDF proposal parsing, full printable report, battery &amp; utility-rate payback) — <a id="proLink" href="#pro">coming soon</a></p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
