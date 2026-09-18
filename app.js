@@ -27,6 +27,7 @@ function syncFields() {
   const rent = t === 'lease' || t === 'ppa';
   $('f-financed').classList.toggle('hidden', !loan);
   $('f-apr').classList.toggle('hidden', !loan);
+  $('f-term').classList.toggle('hidden', !loan);
   $('f-escalator').classList.toggle('hidden', !rent);
 }
 $('financingType').addEventListener('change', syncFields);
@@ -40,6 +41,7 @@ function readInput() {
     financingType: $('financingType').value,
     financedAmount: parseFloat($('financedAmount').value) || 0,
     apr: parseFloat($('apr').value) || 0,
+    termYears: parseFloat($('termYears').value) || 0,
     escalatorPct: parseFloat($('escalatorPct').value) || 0,
     promisedAnnualKwh: parseFloat($('promisedKwh').value) || 0,
     batteryKwh: parseFloat($('batteryKwh').value) || 0,

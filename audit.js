@@ -28,6 +28,21 @@ export function dealerFee(cashPrice, financedAmount) {
 }
 
 /**
+ * Amortized loan cost. Returns { monthly, totalPaid, interest } or null.
+ * Handles 0% APR (interest-free) without dividing by zero.
+ */
+export function loanCost(principal, aprPct, termYears) {
+  const P = +principal || 0;
+  const years = +termYears || 0;
+  if (P <= 0 || years <= 0) return null;
+  const n = Math.round(years * 12);
+  const r = (+aprPct || 0) / 100 / 12;
+  const monthly = r > 0 ? (P * r) / (1 - Math.pow(1 + r, -n)) : P / n;
+  const totalPaid = monthly * n;
+  return { monthly, totalPaid, interest: totalPaid - P };
+}
+
+/**
  * Audit a solar quote. `input` fields:
  *  state, sizeKw, cashPrice, financingType ('cash'|'loan'|'lease'|'ppa'),
  *  financedAmount?, apr?, termYears?, promisedAnnualKwh?, escalatorPct?,
@@ -36,10 +51,12 @@ export function dealerFee(cashPrice, financedAmount) {
  */
 export function auditQuote(input) {
   const b = benchmarkFor(input.state || 'US');
-  const sizeKw = +input.sizeKw || 0;
-  const cash = +input.cashPrice || 0;
+  // Clamp to non-negative — a negative size/price/battery is nonsensical input
+  // and must never flip a comparison or a fair-range figure.
+  const sizeKw = Math.max(0, +input.sizeKw || 0);
+  const cash = Math.max(0, +input.cashPrice || 0);
   const watts = sizeKw * 1000;
-  const battery = +input.batteryKwh || 0;
+  const battery = Math.max(0, +input.batteryKwh || 0);
   const owned = input.financingType === 'cash' || input.financingType === 'loan';
   const year = +input.placedInServiceYear || 2026;
 
@@ -90,6 +107,23 @@ export function auditQuote(input) {
         title: 'That low APR probably hides a dealer fee',
         detail: `A ${(+input.apr).toFixed(2)}% solar loan almost always bakes a 15–30% dealer fee into the amount financed.`,
         argument: 'Get two numbers in writing: the CASH price and the total AMOUNT FINANCED. The difference is the fee.',
+      });
+    }
+
+    // Total-of-payments transparency: a "low monthly" often hides a big total.
+    const principal = (+input.financedAmount || cash);
+    const lc = loanCost(principal, +input.apr, +input.termYears);
+    if (lc && lc.interest > 0) {
+      const heavy = lc.interest > principal * 0.4;
+      // Interest is a real cost but not recoverable "overcharge" money — flag it
+      // for attention (severity) without ever inflating the at-stake headline (amount 0).
+      flags.push({
+        id: 'loan-cost',
+        severity: heavy ? 'medium' : 'info',
+        title: heavy ? 'This loan costs a lot over its life' : 'What this loan really costs',
+        amount: 0,
+        detail: `At ${(+input.apr || 0).toFixed(2)}% over ${+input.termYears} years you'd pay about $${round(lc.monthly).toLocaleString('en-US')}/mo — roughly $${round(lc.totalPaid).toLocaleString('en-US')} total, about $${round(lc.interest).toLocaleString('en-US')} of it interest on a $${round(principal).toLocaleString('en-US')} balance.`,
+        argument: 'Compare the total of all payments (not the monthly) against paying cash or using a low-fee credit-union loan. A low monthly with a long term can cost more than a "worse" APR.',
       });
     }
   }
